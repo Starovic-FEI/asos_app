@@ -22,11 +22,16 @@ export default function RecipesScreen() {
   const [filterCount, setFilterCount] = useState(0)
 
   const loadRecipes = async () => {
-    if (!user) return
-
     try {
       setLoading(true)
       setError(null)
+      
+      if (!user) {
+        console.log('No user, skipping recipe load')
+        setLoading(false)
+        return
+      }
+
       const { data, error: fetchError } = await getUnsavedRecipes(user.id, 20, filters)
 
       if (fetchError) {

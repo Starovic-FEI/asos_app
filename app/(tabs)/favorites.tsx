@@ -30,11 +30,15 @@ export default function FavoritesScreen() {
   }, [user])
 
   const loadRecipes = async () => {
-    if (!user) return
-
     try {
       setLoading(true)
       setError(null)
+
+      if (!user) {
+        console.log('No user, skipping favorites load')
+        setLoading(false)
+        return
+      }
 
       const [savedRes, favRes] = await Promise.all([
         getSavedRecipes(user.id),
