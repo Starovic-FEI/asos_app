@@ -3,14 +3,13 @@ import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
 import { useEffect, useState } from 'react'
 import {
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native'
 import { getCategories } from '../../lib/api/categories'
 import { uploadMultipleRecipeImages } from '../../lib/api/images'
@@ -19,6 +18,7 @@ import { saveRecipe } from '../../lib/api/saved'
 import { addRecipeTags, getTags } from '../../lib/api/tags'
 import { Category, Ingredient, Tag } from '../../lib/models/types'
 import { theme } from '../../lib/theme'
+import { showAlert } from '../../lib/utils/alert'
 import { useAuth } from '../../lib/viewmodels/useAuth'
 
 interface SelectedImage {
@@ -130,7 +130,7 @@ export default function RecipeCreateScreen() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
 
     if (status !== 'granted') {
-      Alert.alert('Chyba', 'Potrebujem prístup k fotkám!')
+      showAlert('Chyba', 'Potrebujem prístup k fotkám!')
       return
     }
 
@@ -166,31 +166,31 @@ export default function RecipeCreateScreen() {
   // Validácia
   const validate = () => {
     if (!title.trim()) {
-      Alert.alert('⚠️ Chýba názov', 'Musíš zadať názov receptu', [{ text: 'OK' }])
+      showAlert('⚠️ Chýba názov', 'Musíš zadať názov receptu')
       return false
     }
     if (!description.trim()) {
-      Alert.alert('⚠️ Chýba popis', 'Musíš zadať popis receptu', [{ text: 'OK' }])
+      showAlert('⚠️ Chýba popis', 'Musíš zadať popis receptu')
       return false
     }
     if (ingredients.every(ing => !ing.name.trim())) {
-      Alert.alert('⚠️ Chýbajú ingrediencie', 'Musíš pridať aspoň jednu ingredienciu', [{ text: 'OK' }])
+      showAlert('⚠️ Chýbajú ingrediencie', 'Musíš pridať aspoň jednu ingredienciu')
       return false
     }
     if (steps.every(step => !step.trim())) {
-      Alert.alert('⚠️ Chýbajú kroky', 'Musíš pridať aspoň jeden krok prípravy', [{ text: 'OK' }])
+      showAlert('⚠️ Chýbajú kroky', 'Musíš pridať aspoň jeden krok prípravy')
       return false
     }
     if (!categoryId) {
-      Alert.alert('⚠️ Chýba kategória', 'Musíš vybrať kategóriu receptu', [{ text: 'OK' }])
+      showAlert('⚠️ Chýba kategória', 'Musíš vybrať kategóriu receptu')
       return false
     }
     if (!prepTime || parseInt(prepTime) <= 0) {
-      Alert.alert('⚠️ Chýba čas', 'Musíš zadať čas prípravy (v minútach)', [{ text: 'OK' }])
+      showAlert('⚠️ Chýba čas', 'Musíš zadať čas prípravy (v minútach)')
       return false
     }
     if (!servings || parseInt(servings) <= 0) {
-      Alert.alert('⚠️ Chýba počet porcií', 'Musíš zadať počet porcií', [{ text: 'OK' }])
+      showAlert('⚠️ Chýba počet porcií', 'Musíš zadať počet porcií')
       return false
     }
     return true
@@ -207,7 +207,7 @@ export default function RecipeCreateScreen() {
 
     if (!user) {
       console.log('❌ Používateľ nie je prihlásený')
-      Alert.alert('Chyba', 'Musíš byť prihlásený')
+      showAlert('Chyba', 'Musíš byť prihlasený')
       return
     }
 
@@ -242,7 +242,7 @@ export default function RecipeCreateScreen() {
 
       if (error) {
         console.error('❌ Chyba pri vytváraní receptu:', error)
-        Alert.alert('Chyba pri vytváraní', `${error.message}\n\nDetail: ${JSON.stringify(error, null, 2)}`)
+        showAlert('Chyba pri vytváraní', `${error.message}\n\nDetail: ${JSON.stringify(error, null, 2)}`)
         setLoading(false)
         return
       }
@@ -303,7 +303,7 @@ export default function RecipeCreateScreen() {
         console.error('⚠️ Nepodarilo sa automaticky uložiť:', saveError)
       }
 
-      Alert.alert(
+      showAlert(
         '🎉 Úspech!',
         `Recept "${title}" bol úspešne vytvorený a pridaný do tvojich obľúbených!`,
         [
@@ -315,7 +315,7 @@ export default function RecipeCreateScreen() {
       )
     } catch (err) {
       console.error('❌ KRITICKÁ CHYBA:', err)
-      Alert.alert('Kritická chyba', `${err}\n\n${JSON.stringify(err, null, 2)}`)
+      showAlert('Kritická chyba', `${err}\n\n${JSON.stringify(err, null, 2)}`)
     } finally {
       setLoading(false)
       console.log('=== KONIEC UKLADANIA ===')
