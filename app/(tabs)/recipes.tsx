@@ -1,14 +1,15 @@
 // app/(tabs)/recipes.tsx
 import { router } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import RecipeCarousel from '../../components/RecipeCarousel'
 import RecipeFiltersModal, { RecipeFilters } from '../../components/RecipeFilters'
 import { getUnsavedRecipes } from '../../lib/api/recipies'
-import { reportRecipe } from '../../lib/api/reports'
+import { hasUserReported, reportRecipe } from '../../lib/api/reports'
 import { saveRecipe } from '../../lib/api/saved'
 import { Recipe } from '../../lib/models/types'
 import { theme } from '../../lib/theme'
+import { showAlert, showConfirm } from '../../lib/utils/alert'
 import { useAuth } from '../../lib/viewmodels/useAuth'
 
 export default function RecipesScreen() {
@@ -20,43 +21,85 @@ export default function RecipesScreen() {
   const [showFilters, setShowFilters] = useState(false)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [filterCount, setFilterCount] = useState(0)
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const prevUserIdRef = useRef<string | null>(null)
 
   const loadRecipes = async () => {
-    // Don't try to load if auth is still loading
-    if (authLoading) {
-      console.log('Auth still loading, waiting...')
-      return
-    }
-
+    console.log('[loadRecipes] Starting - user:', !!user, 'hasLoadedOnce:', hasLoadedOnce)
+    
     try {
       setLoading(true)
       setError(null)
       
       if (!user) {
-        console.log('No user, skipping recipe load')
+        console.log('[loadRecipes] No user, stopping')
+        setRecipes([])
         setLoading(false)
+        setHasLoadedOnce(true)
         return
       }
 
+      console.log('[loadRecipes] Fetching recipes for user:', user.id)
       const { data, error: fetchError } = await getUnsavedRecipes(user.id, 20, filters)
 
       if (fetchError) {
         setError('Nepodarilo sa načítať recepty')
-        console.error('Error loading recipes:', fetchError)
+        console.error('[loadRecipes] Error:', fetchError)
       } else if (data) {
+        console.log('[loadRecipes] Success - loaded', data.length, 'recipes')
         setRecipes(data)
       }
     } catch (err) {
       setError('Nastala chyba pri načítavaní receptov')
-      console.error('Error:', err)
+      console.error('[loadRecipes] Exception:', err)
     } finally {
+      console.log('[loadRecipes] Finished')
       setLoading(false)
+      setHasLoadedOnce(true)
     }
   }
 
+  // Main effect - only runs on mount and when filters change
   useEffect(() => {
+    console.log('[Effect:main] Triggered - authLoading:', authLoading, 'user:', !!user, 'hasLoadedOnce:', hasLoadedOnce)
+    
+    if (authLoading) {
+      console.log('[Effect:main] Auth still loading, waiting...')
+      return
+    }
+
     loadRecipes()
-  }, [filters, user, authLoading])
+  }, [filters])
+
+  // Auth effect - only runs when auth completes
+  useEffect(() => {
+    console.log('[Effect:auth] Triggered - authLoading:', authLoading, 'hasLoadedOnce:', hasLoadedOnce)
+    
+    if (!authLoading && !hasLoadedOnce) {
+      console.log('[Effect:auth] Auth ready, initial load')
+      loadRecipes()
+    }
+  }, [authLoading])
+
+  // User change effect - reload when user ID actually changes (login/logout)
+  useEffect(() => {
+    const currentUserId = user?.id || null
+    const prevUserId = prevUserIdRef.current
+    console.log('[Effect:user] Check - prev:', prevUserId, 'current:', currentUserId, 'hasLoadedOnce:', hasLoadedOnce)
+    
+    // Always update ref to current user ID
+    prevUserIdRef.current = currentUserId
+    
+    // Only reload if:
+    // 1. Auth is complete AND
+    // 2. We've loaded at least once AND  
+    // 3. Previous user ID was not null (not initial load) AND
+    // 4. User ID actually changed
+    if (!authLoading && hasLoadedOnce && prevUserId !== null && prevUserId !== currentUserId) {
+      console.log('[Effect:user] User ID changed, reloading')
+      loadRecipes()
+    }
+  }, [user])
 
   useEffect(() => {
     if (Platform.OS === 'web') {
@@ -111,20 +154,50 @@ export default function RecipesScreen() {
     if (!user) return
 
     try {
-      const { error } = await reportRecipe(user.id, recipeId, 'Nevhodný obsah')
-      if (error) {
-        console.error('Error reporting recipe:', error)
-      } else {
-        // Odstránime recept zo zoznamu
+      // Check if user already reported this recipe
+      const { hasReported } = await hasUserReported(user.id, recipeId)
+      
+      if (hasReported) {
+        showAlert('Už nahlásené', 'Tento recept si už predtým nahlásil.')
+        // Still remove it from the list
         setRecipes(prev => prev.filter(r => r.id !== recipeId))
-
-        // Ak došli recepty, načítame nové
         if (recipes.length <= 3) {
           loadRecipes()
         }
+        return
       }
+
+      // Show confirmation dialog
+      showConfirm(
+        'Nahlásiť recept',
+        'Naozaj chceš nahlásiť tento recept ako nevhodný obsah?',
+        async () => {
+          try {
+            const { error } = await reportRecipe(user.id, recipeId, 'Nevhodný obsah')
+            if (error) {
+              console.error('Error reporting recipe:', error)
+              showAlert('Chyba', 'Nepodarilo sa nahlásiť recept')
+            } else {
+              showAlert('✓ Úspech', 'Recept bol nahlásený. Ďakujeme za spätnú väzbu.')
+              // Odstránime recept zo zoznamu
+              setRecipes(prev => prev.filter(r => r.id !== recipeId))
+
+              // Ak došli recepty, načítame nové
+              if (recipes.length <= 3) {
+                loadRecipes()
+              }
+            }
+          } catch (err) {
+            console.error('Error:', err)
+            showAlert('Chyba', 'Nastala neočakávaná chyba')
+          }
+        },
+        undefined,
+        'Nahlásiť',
+        'Zrušiť'
+      )
     } catch (err) {
-      console.error('Error:', err)
+      console.error('Error checking report status:', err)
     }
   }
 

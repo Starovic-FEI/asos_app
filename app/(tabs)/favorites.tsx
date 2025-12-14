@@ -1,6 +1,6 @@
 // app/(tabs)/favorites.tsx
 import { router } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Image,
@@ -24,28 +24,26 @@ export default function FavoritesScreen() {
   const [favoriteRecipes, setFavoriteRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    loadRecipes()
-  }, [user, authLoading])
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false)
+  const prevUserIdRef = useRef<string | null>(null)
 
   const loadRecipes = async () => {
-    // Don't try to load if auth is still loading
-    if (authLoading) {
-      console.log('Auth still loading, waiting...')
-      return
-    }
-
+    console.log('[loadRecipes] Starting - user:', !!user, 'hasLoadedOnce:', hasLoadedOnce)
+    
     try {
       setLoading(true)
       setError(null)
 
       if (!user) {
-        console.log('No user, skipping favorites load')
+        console.log('[loadRecipes] No user, stopping')
+        setSavedRecipes([])
+        setFavoriteRecipes([])
         setLoading(false)
+        setHasLoadedOnce(true)
         return
       }
 
+      console.log('[loadRecipes] Fetching favorites for user:', user.id)
       const [savedRes, favRes] = await Promise.all([
         getSavedRecipes(user.id),
         getFavoriteRecipes(user.id),
@@ -53,6 +51,7 @@ export default function FavoritesScreen() {
 
       if (savedRes.error || favRes.error) {
         setError('Nepodarilo sa načítať recepty')
+        console.error('[loadRecipes] Error:', savedRes.error || favRes.error)
       } else {
         const savedRecipesData = savedRes.data
           ?.filter(saved => saved.recipes)
@@ -62,16 +61,49 @@ export default function FavoritesScreen() {
           ?.filter(saved => saved.recipes)
           .map(saved => saved.recipes!) || []
 
+        console.log('[loadRecipes] Success - saved:', savedRecipesData.length, 'favorites:', favoriteRecipesData.length)
         setSavedRecipes(savedRecipesData)
         setFavoriteRecipes(favoriteRecipesData)
       }
     } catch (err) {
       setError('Nastala chyba pri načítavaní receptov')
-      console.error('Error:', err)
+      console.error('[loadRecipes] Exception:', err)
     } finally {
+      console.log('[loadRecipes] Finished')
       setLoading(false)
+      setHasLoadedOnce(true)
     }
   }
+
+  // Auth effect - only runs when auth completes
+  useEffect(() => {
+    console.log('[Effect:auth] Triggered - authLoading:', authLoading, 'hasLoadedOnce:', hasLoadedOnce)
+    
+    if (!authLoading && !hasLoadedOnce) {
+      console.log('[Effect:auth] Auth ready, initial load')
+      loadRecipes()
+    }
+  }, [authLoading])
+
+  // User change effect - reload when user ID actually changes (login/logout)
+  useEffect(() => {
+    const currentUserId = user?.id || null
+    const prevUserId = prevUserIdRef.current
+    console.log('[Effect:user] Check - prev:', prevUserId, 'current:', currentUserId, 'hasLoadedOnce:', hasLoadedOnce)
+    
+    // Always update ref to current user ID
+    prevUserIdRef.current = currentUserId
+    
+    // Only reload if:
+    // 1. Auth is complete AND
+    // 2. We've loaded at least once AND  
+    // 3. Previous user ID was not null (not initial load) AND
+    // 4. User ID actually changed
+    if (!authLoading && hasLoadedOnce && prevUserId !== null && prevUserId !== currentUserId) {
+      console.log('[Effect:user] User ID changed, reloading')
+      loadRecipes()
+    }
+  }, [user])
 
   const handleRemoveSaved = async (recipeId: number) => {
     if (!user) return
