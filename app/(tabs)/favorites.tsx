@@ -13,6 +13,7 @@ import {
 import { getFavoriteRecipes, getSavedRecipes, removeSavedRecipe, toggleFavorite } from '../../lib/api/saved'
 import { Recipe } from '../../lib/models/types'
 import { theme } from '../../lib/theme'
+import { safeGoBack } from '../../lib/utils/navigation'
 import { useAuth } from '../../lib/viewmodels/useAuth'
 
 type TabType = 'saved' | 'favorites'
@@ -192,7 +193,7 @@ export default function FavoritesScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={safeGoBack} style={styles.backButton}>
           <Text style={styles.backButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Moje recepty</Text>

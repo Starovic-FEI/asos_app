@@ -17,6 +17,7 @@ import { hasUserReported, reportRecipe } from '../../lib/api/reports'
 import { Recipe } from '../../lib/models/types'
 import { theme } from '../../lib/theme'
 import { showAlert, showConfirm } from '../../lib/utils/alert'
+import { safeGoBack } from '../../lib/utils/navigation'
 import { useAuth } from '../../lib/viewmodels/useAuth'
 
 export default function RecipeDetailScreen() {
@@ -155,7 +156,7 @@ export default function RecipeDetailScreen() {
     return (
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>Recept sa nenašiel</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={safeGoBack}>
           <Text style={styles.backButtonText}>Späť</Text>
         </TouchableOpacity>
       </View>
@@ -186,7 +187,7 @@ export default function RecipeDetailScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+        <TouchableOpacity onPress={safeGoBack} style={styles.headerButton}>
           <Text style={styles.headerButtonText}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Detail receptu</Text>
