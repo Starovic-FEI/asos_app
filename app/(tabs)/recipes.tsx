@@ -1,6 +1,6 @@
 // app/(tabs)/recipes.tsx
 import { router } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ActivityIndicator, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import RecipeCarousel from '../../components/RecipeCarousel'
 import RecipeFiltersModal, { RecipeFilters } from '../../components/RecipeFilters'

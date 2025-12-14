@@ -1,19 +1,19 @@
 // app/(tabs)/favorites.tsx
-import React, { useEffect, useState } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-} from 'react-native'
 import { router } from 'expo-router'
+import { useEffect, useState } from 'react'
+import {
+    ActivityIndicator,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native'
+import { getFavoriteRecipes, getSavedRecipes, removeSavedRecipe, toggleFavorite } from '../../lib/api/saved'
 import { Recipe } from '../../lib/models/types'
-import { getSavedRecipes, getFavoriteRecipes, removeSavedRecipe, toggleFavorite } from '../../lib/api/saved'
-import { useAuth } from '../../lib/viewmodels/useAuth'
 import { theme } from '../../lib/theme'
+import { useAuth } from '../../lib/viewmodels/useAuth'
 
 type TabType = 'saved' | 'favorites'
 
