@@ -64,3 +64,33 @@ export const updateProfile = async (userId: string, updates: Partial<Profile>) =
 
   return { data: data as Profile, error }
 }
+
+// Google OAuth prihlásenie
+export const signInWithGoogle = async () => {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window?.location?.origin || undefined,
+    }
+  })
+
+  return { data, error }
+}
+
+// Zabudnuté heslo - odoslanie emailu na reset
+export const sendPasswordResetEmail = async (email: string) => {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window?.location?.origin}/(auth)/reset-password` || undefined,
+  })
+
+  return { data, error }
+}
+
+// Aktualizácia hesla (po kliknutí na link v emaili)
+export const updatePassword = async (newPassword: string) => {
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword
+  })
+
+  return { data, error }
+}

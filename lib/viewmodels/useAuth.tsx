@@ -1,7 +1,7 @@
 // lib/viewmodels/useAuth.ts
 import { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
-import { getCurrentUser, getProfile, login, logout, register } from '../api/auth'
+import { getCurrentUser, getProfile, login, logout, register, signInWithGoogle, sendPasswordResetEmail, updatePassword } from '../api/auth'
 import { Profile } from '../models/types'
 
 export const useAuth = () => {
@@ -73,6 +73,58 @@ export const useAuth = () => {
     setProfile(null)
   }
 
+  // Google OAuth prihlásenie
+  const handleGoogleLogin = async () => {
+    setLoading(true)
+    setError(null)
+
+    const { error } = await signInWithGoogle()
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return false
+    }
+
+    // OAuth redirect sa stará o presmerovanie, takže tu len nastavíme loading
+    setLoading(false)
+    return true
+  }
+
+  // Zabudnuté heslo
+  const handleForgotPassword = async (email: string) => {
+    setLoading(true)
+    setError(null)
+
+    const { error } = await sendPasswordResetEmail(email)
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return false
+    }
+
+    setLoading(false)
+    return true
+  }
+
+  // Reset hesla
+  const handleResetPassword = async (newPassword: string) => {
+    setLoading(true)
+    setError(null)
+
+    const { error } = await updatePassword(newPassword)
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return false
+    }
+
+    setLoading(false)
+    return true
+  }
+
   return {
     user,
     profile,
@@ -81,6 +133,9 @@ export const useAuth = () => {
     isLoggedIn: !!user,
     login: handleLogin,
     register: handleRegister,
-    logout: handleLogout
+    logout: handleLogout,
+    loginWithGoogle: handleGoogleLogin,
+    forgotPassword: handleForgotPassword,
+    resetPassword: handleResetPassword,
   }
 }
