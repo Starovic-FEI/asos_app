@@ -153,17 +153,20 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
   }
 
   const panGesture = Gesture.Pan()
+    .activeOffsetX([-10, 10]) // Aktivuje sa len pri horizontálnom pohybe ±10px
+    .failOffsetY([-15, 15]) // Zruší sa pri vertikálnom pohybe ±15px (scroll)
     .onUpdate((event) => {
+      // Len horizontálny pohyb
       translateX.value = event.translationX
-      translateY.value = event.translationY
+      translateY.value = 0 // Ignoruj vertikálny pohyb
     })
     .onEnd((event) => {
       const swipeThreshold = cardWidth * 0.5
-      
+
       if (Math.abs(event.translationX) > swipeThreshold) {
         const direction = event.translationX > 0 ? 1 : -1
         swipeDirection.value = direction
-        
+
         if (direction > 0) {
           runOnJS(triggerLike)()
           nextCardTranslateX.value = -cardWidth * 1.2
@@ -171,10 +174,10 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
           runOnJS(triggerDislike)()
           nextCardTranslateX.value = cardWidth * 1.2
         }
-        
+
         translateX.value = withSpring(event.translationX > 0 ? cardWidth * 2 : -cardWidth * 2)
         translateY.value = withSpring(0)
-        
+
         setTimeout(() => {
           nextCardOpacity.value = 1
           nextCardTranslateX.value = withSpring(0, { damping: 20, stiffness: 90 })

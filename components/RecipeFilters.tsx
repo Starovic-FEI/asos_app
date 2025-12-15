@@ -283,8 +283,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '80%',
-    paddingBottom: 32,
+    maxHeight: '90%', // Zvýšené z 80% na 90% pre lepšiu viditeľnosť
+    minHeight: '60%', // Minimálna výška aby boli filtre dobre viditeľné
+    paddingBottom: 20, // Znížené z 32 na 20
   },
   header: {
     flexDirection: 'row',

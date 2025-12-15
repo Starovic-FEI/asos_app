@@ -3,6 +3,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { router } from 'expo-router'
 import { useEffect, useState } from 'react'
 import {
+  AppState,
   Image,
   ScrollView,
   StyleSheet,
@@ -53,30 +54,93 @@ export default function RecipeCreateScreen() {
 
   // Načítať kategórie a tagy
   useEffect(() => {
+    let isMounted = true
+    const abortController = new AbortController()
+
     const loadData = async () => {
-      console.log('🔄 Načítavam kategórie a tagy...')
+      try {
+        console.log('🔄 Načítavam kategórie a tagy...')
 
-      const { data: categoriesData, error: categoriesError } = await getCategories()
-      const { data: tagsData, error: tagsError } = await getTags()
+        // Timeout pre requesty (10 sekúnd)
+        const timeoutId = setTimeout(() => {
+          abortController.abort()
+          console.log('⏱️ Request timeout - zrušené')
+        }, 10000)
 
-      if (categoriesError) {
-        console.error('❌ Chyba pri načítaní kategórií:', categoriesError)
-      } else {
-        console.log('✅ Kategórie načítané:', categoriesData)
+        const { data: categoriesData, error: categoriesError } = await getCategories()
+        const { data: tagsData, error: tagsError } = await getTags()
+
+        clearTimeout(timeoutId)
+
+        // Kontrola či komponent ešte existuje
+        if (!isMounted) {
+          console.log('⚠️ Komponent už neexistuje, preskakujem update')
+          return
+        }
+
+        if (categoriesError) {
+          console.error('❌ Chyba pri načítaní kategórií:', categoriesError)
+        } else {
+          console.log('✅ Kategórie načítané:', categoriesData)
+        }
+
+        if (tagsError) {
+          console.error('❌ Chyba pri načítaní tagov:', tagsError)
+        } else {
+          console.log('✅ Tagy načítané:', tagsData)
+        }
+
+        if (categoriesData) setCategories(categoriesData)
+        if (tagsData) setTags(tagsData)
+      } catch (error) {
+        if (!isMounted) return
+        console.error('❌ Chyba pri načítavaní:', error)
+      } finally {
+        if (isMounted) {
+          setDataLoading(false)
+        }
       }
-
-      if (tagsError) {
-        console.error('❌ Chyba pri načítaní tagov:', tagsError)
-      } else {
-        console.log('✅ Tagy načítané:', tagsData)
-      }
-
-      if (categoriesData) setCategories(categoriesData)
-      if (tagsData) setTags(tagsData)
-      setDataLoading(false)
     }
 
     loadData()
+
+    // Cleanup funkcia
+    return () => {
+      isMounted = false
+      abortController.abort()
+      console.log('🧹 Cleanup: Zrušené načítavanie')
+    }
+  }, [])
+
+  // Opätovne načítať dáta keď sa vrátite na stránku/app
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextAppState) => {
+      if (nextAppState === 'active') {
+        console.log('📱 App sa vrátil do popredia, načítavam dáta...')
+        setDataLoading(true)
+
+        // Znovu načítať dáta
+        const reloadData = async () => {
+          try {
+            const { data: categoriesData, error: categoriesError } = await getCategories()
+            const { data: tagsData, error: tagsError } = await getTags()
+
+            if (!categoriesError && categoriesData) setCategories(categoriesData)
+            if (!tagsError && tagsData) setTags(tagsData)
+          } catch (error) {
+            console.error('❌ Chyba pri opätovnom načítavaní:', error)
+          } finally {
+            setDataLoading(false)
+          }
+        }
+
+        reloadData()
+      }
+    })
+
+    return () => {
+      subscription.remove()
+    }
   }, [])
 
   // Pridať ingredienciu
