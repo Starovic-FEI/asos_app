@@ -759,7 +759,7 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
           onPress={handleLike}
           activeOpacity={0.7}
         >
-          <Text style={styles.actionButtonIcon}>♡</Text>
+          <Text style={styles.actionButtonIcon}>✓</Text>
         </TouchableOpacity>
       </View>
     </View>
