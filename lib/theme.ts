@@ -10,6 +10,7 @@ export const theme = {
 
     // Primary
     primary: '#FF6B35',
+    primaryMedium: '#FF9966',
     primaryLight: '#FFE8E0',
 
     // Text

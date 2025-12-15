@@ -347,7 +347,7 @@ export default function FavoritesScreen() {
                   >
                     <View style={styles.recipeTitleRow}>
                       <Text style={styles.recipeTitle} numberOfLines={1}>{recipe.title}</Text>
-                      {isFavorite && <Text style={styles.favoriteHeart}>♥️</Text>}
+                      {isFavorite && <Text style={styles.favoriteHeart}>♥</Text>}
                     </View>
 
                     {/* Info */}
@@ -389,7 +389,7 @@ export default function FavoritesScreen() {
                         activeOpacity={0.7}
                       >
                         <Text style={styles.actionButtonText}>
-                          {isFavorite ? '♥️ Obľúbené' : '🤍 Pridať do obľúbených'}
+                          {isFavorite ? '♥ Obľúbené' : '♡ Pridať do obľúbených'}
                         </Text>
                       </TouchableOpacity>
 
@@ -401,7 +401,7 @@ export default function FavoritesScreen() {
                         }}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.removeButtonText}>🗑️</Text>
+                        <Text style={styles.removeButtonText}>✕</Text>
                       </TouchableOpacity>
                     </View>
                   </TouchableOpacity>
@@ -541,19 +541,20 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   recipeCard: {
+    flexDirection: 'row',
     backgroundColor: 'white',
-    borderRadius: 16,
+    borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   imageSection: {
-    width: '100%',
-    height: 250,
+    width: 140,
+    height: 160,
     position: 'relative',
     backgroundColor: '#f5f5f5',
   },
@@ -569,10 +570,10 @@ const styles = StyleSheet.create({
   imageArrow: {
     position: 'absolute',
     top: '50%',
-    marginTop: -20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    marginTop: -15,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     backgroundColor: 'rgba(255,255,255,0.9)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -583,35 +584,35 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   imageArrowLeft: {
-    left: 12,
+    left: 4,
   },
   imageArrowRight: {
-    right: 12,
+    right: 4,
   },
   imageArrowText: {
-    fontSize: 32,
+    fontSize: 24,
     color: theme.colors.primary,
     fontWeight: 'bold',
-    marginTop: -4,
+    marginTop: -3,
   },
   dotsContainer: {
     position: 'absolute',
-    bottom: 12,
+    bottom: 6,
     left: 0,
     right: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 6,
+    gap: 4,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: 'rgba(255,255,255,0.5)',
   },
   dotActive: {
     backgroundColor: 'white',
-    width: 24,
+    width: 18,
   },
   placeholderImage: {
     justifyContent: 'center',
@@ -622,28 +623,29 @@ const styles = StyleSheet.create({
   },
   recipeContent: {
     flex: 1,
-    padding: 12,
+    padding: 10,
   },
   recipeTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 6,
+    marginBottom: 6,
   },
   recipeTitle: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: theme.colors.textPrimary,
   },
   favoriteHeart: {
     fontSize: 18,
+    color: theme.colors.primaryMedium,
   },
   recipeInfo: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 6,
-    marginBottom: 8,
+    gap: 4,
+    marginBottom: 6,
   },
   infoBadge: {
     flexDirection: 'row',
@@ -679,7 +681,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: theme.colors.primary,
+    borderColor: theme.colors.primaryMedium,
     alignItems: 'center',
   },
   actionButtonActive: {
@@ -688,18 +690,19 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: theme.colors.primary,
+    color: theme.colors.primaryMedium,
   },
   removeButton: {
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E74C3C',
+    backgroundColor: theme.colors.primaryMedium,
     alignItems: 'center',
     justifyContent: 'center',
   },
   removeButtonText: {
     fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
   },
 })

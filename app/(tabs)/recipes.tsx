@@ -248,14 +248,11 @@ export default function RecipesScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Objavuj recepty</Text>
         <View style={styles.headerButtons}>
-          <TouchableOpacity onPress={loadRecipes} style={styles.iconButton}>
-            <Text style={styles.iconButtonText}>🔄</Text>
-          </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setShowFilters(true)}
             style={styles.filterButton}
           >
-            <Text style={styles.filterButtonText}>⚙️</Text>
+            <Text style={styles.filterButtonText}>⚙</Text>
             {filterCount > 0 && (
               <View style={styles.filterBadge}>
                 <Text style={styles.filterBadgeText}>{filterCount}</Text>
@@ -325,7 +322,6 @@ export default function RecipesScreen() {
               onPress={handleFavorites}
               activeOpacity={0.7}
             >
-              <Text style={styles.profileMenuItemIcon}>📝</Text>
               <Text style={styles.profileMenuItemText}>Uložené recepty</Text>
             </TouchableOpacity>
 
@@ -334,7 +330,6 @@ export default function RecipesScreen() {
               onPress={handleCreateRecipe}
               activeOpacity={0.7}
             >
-              <Text style={styles.profileMenuItemIcon}>➕</Text>
               <Text style={styles.profileMenuItemText}>Vytvoriť recept</Text>
             </TouchableOpacity>
 
@@ -343,7 +338,6 @@ export default function RecipesScreen() {
               onPress={handleLogout}
               activeOpacity={0.7}
             >
-              <Text style={styles.profileMenuItemIcon}>🚪</Text>
               <Text style={[styles.profileMenuItemText, styles.profileMenuItemTextDanger]}>
                 Odhlásiť sa
               </Text>
@@ -391,28 +385,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  iconButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 20,
-    backgroundColor: theme.colors.background,
-  },
-  iconButtonText: {
-    fontSize: 20,
-  },
   filterButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
-    backgroundColor: theme.colors.primaryLight,
+    backgroundColor: theme.colors.primary,
     position: 'relative',
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
   filterButtonText: {
     fontSize: 20,
+    color: 'white',
   },
   filterBadge: {
     position: 'absolute',
@@ -431,7 +420,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   profileButton: {
-    padding: 4,
+    // Removed padding for proper alignment
   },
   avatarContainer: {
     width: 40,

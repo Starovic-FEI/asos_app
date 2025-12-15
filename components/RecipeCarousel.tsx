@@ -450,7 +450,7 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
                 onPress={() => onReport(currentRecipe.id)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.reportButtonText}>⚠️</Text>
+                <Text style={styles.reportButtonText}>!</Text>
               </TouchableOpacity>
             </View>
 
@@ -494,7 +494,7 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
             {/* Description */}
             {currentRecipe.description && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>📝 Popis</Text>
+                <Text style={styles.sectionTitle}>Popis</Text>
                 <Text style={styles.description}>{currentRecipe.description}</Text>
               </View>
             )}
@@ -502,7 +502,7 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
             {/* Ingredients */}
             {currentRecipe.ingredients && currentRecipe.ingredients.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>🥘 Ingrediencie</Text>
+                <Text style={styles.sectionTitle}>Ingrediencie</Text>
                 {currentRecipe.ingredients.map((ingredient, index) => (
                   <View key={index} style={styles.ingredientItem}>
                     <View style={styles.ingredientBullet} />
@@ -520,7 +520,7 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
             {/* Steps */}
             {currentRecipe.steps && currentRecipe.steps.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>👨‍🍳 Postup prípravy</Text>
+                <Text style={styles.sectionTitle}>Postup prípravy</Text>
                 {currentRecipe.steps.map((step, index) => (
                   <View key={index} style={styles.stepItem}>
                     <View style={styles.stepNumber}>
@@ -535,7 +535,7 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
             {/* Tags */}
             {currentRecipe.recipe_tags && currentRecipe.recipe_tags.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>🏷️ Tagy</Text>
+                <Text style={styles.sectionTitle}>Tagy</Text>
                 <View style={styles.tagsRow}>
                   {currentRecipe.recipe_tags.map((recipeTag) => (
                     <View key={recipeTag.id} style={styles.tag}>
@@ -573,7 +573,7 @@ export default function RecipeCarousel({ recipes, onLike, onReport }: RecipeCaro
           onPress={handleLike}
           activeOpacity={0.7}
         >
-          <Text style={styles.actionButtonIcon}>♥</Text>
+          <Text style={styles.actionButtonIcon}>♡</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   dislikeButton: {
-    backgroundColor: '#95A5A6',
+    backgroundColor: theme.colors.primary,
   },
   likeButton: {
     backgroundColor: theme.colors.primary,
@@ -777,15 +777,15 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#FFF3E0',
-    borderWidth: 1,
-    borderColor: '#FF9800',
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 4,
   },
   reportButtonText: {
     fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold',
   },
   infoRow: {
     flexDirection: 'row',

@@ -35,8 +35,10 @@ export default function RecipeDetailScreen() {
   const [isRatingLoading, setIsRatingLoading] = useState(false)
   const [hasReported, setHasReported] = useState(false)
   const [isReporting, setIsReporting] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
+    setCurrentImageIndex(0) // Reset image index when recipe changes
     loadRecipe()
     loadUserRating()
     checkIfReported()
@@ -183,6 +185,18 @@ export default function RecipeDetailScreen() {
     }
   }
 
+  const handleNextImage = () => {
+    if (!recipe || !recipe.recipe_images) return
+    const totalImages = recipe.recipe_images.length
+    setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1))
+  }
+
+  const handlePreviousImage = () => {
+    if (!recipe || !recipe.recipe_images) return
+    const totalImages = recipe.recipe_images.length
+    setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1))
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -194,32 +208,61 @@ export default function RecipeDetailScreen() {
         <View style={styles.headerSpacer} />
       </View>
 
-      {/* Responsive Layout */}
-      <View style={[styles.mainContent, isMobile && styles.mainContentMobile]}>
-        {/* Left Side - Images */}
-        <ScrollView style={[styles.leftSide, isMobile && styles.leftSideMobile]} showsVerticalScrollIndicator={false}>
-          <View style={styles.imagesColumn}>
-            {images.length > 0 ? (
-              images.map((image, index) => (
-                <View key={image.id} style={styles.imageWrapper}>
-                  <Image
-                    source={{ uri: image.image_url }}
-                    style={styles.image}
-                    resizeMode="cover"
-                  />
-                </View>
-              ))
-            ) : (
-              <View style={[styles.image, styles.placeholderImage]}>
-                <Text style={styles.placeholderText}>🍳</Text>
-              </View>
-            )}
-          </View>
-        </ScrollView>
+      {/* Single Scrollable Content */}
+      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Image Carousel Section */}
+        <View style={styles.imageSection}>
+          {images.length > 0 ? (
+            <>
+              <Image
+                source={{ uri: images[currentImageIndex].image_url }}
+                style={styles.image}
+                resizeMode="cover"
+              />
 
-        {/* Right Side - Content */}
-        <ScrollView style={[styles.rightSide, isMobile && styles.rightSideMobile]} showsVerticalScrollIndicator={false}>
-          <View style={styles.content}>
+              {/* Image Navigation Arrows - Only show if more than 1 image */}
+              {images.length > 1 && (
+                <>
+                  <TouchableOpacity
+                    style={[styles.imageArrow, styles.imageArrowLeft]}
+                    onPress={handlePreviousImage}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.imageArrowText}>‹</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.imageArrow, styles.imageArrowRight]}
+                    onPress={handleNextImage}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.imageArrowText}>›</Text>
+                  </TouchableOpacity>
+
+                  {/* Image Dots Indicator */}
+                  <View style={styles.dotsContainer}>
+                    {images.map((_, index) => (
+                      <View
+                        key={index}
+                        style={[
+                          styles.dot,
+                          currentImageIndex === index && styles.dotActive,
+                        ]}
+                      />
+                    ))}
+                  </View>
+                </>
+              )}
+            </>
+          ) : (
+            <View style={[styles.image, styles.placeholderImage]}>
+              <Text style={styles.placeholderText}>🍳</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Content Section */}
+        <View style={styles.content}>
             {/* Title */}
             <Text style={styles.title}>{recipe.title}</Text>
 
@@ -279,7 +322,7 @@ export default function RecipeDetailScreen() {
             {/* Description */}
             {recipe.description && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>📝 Popis</Text>
+                <Text style={styles.sectionTitle}>Popis</Text>
                 <Text style={styles.description}>{recipe.description}</Text>
               </View>
             )}
@@ -287,7 +330,7 @@ export default function RecipeDetailScreen() {
             {/* Ingredients */}
             {recipe.ingredients && recipe.ingredients.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>🥘 Ingrediencie</Text>
+                <Text style={styles.sectionTitle}>Ingrediencie</Text>
                 {recipe.ingredients.map((ingredient, index) => (
                   <View key={index} style={styles.ingredientItem}>
                     <View style={styles.ingredientBullet} />
@@ -305,7 +348,7 @@ export default function RecipeDetailScreen() {
             {/* Steps */}
             {recipe.steps && recipe.steps.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>👨‍🍳 Postup prípravy</Text>
+                <Text style={styles.sectionTitle}>Postup prípravy</Text>
                 {recipe.steps.map((step, index) => (
                   <View key={index} style={styles.stepItem}>
                     <View style={styles.stepNumber}>
@@ -320,7 +363,7 @@ export default function RecipeDetailScreen() {
             {/* Tags */}
             {recipe.recipe_tags && recipe.recipe_tags.length > 0 && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>🏷️ Tagy</Text>
+                <Text style={styles.sectionTitle}>Tagy</Text>
                 <View style={styles.tagsRow}>
                   {recipe.recipe_tags.map((recipeTag) => (
                     <View key={recipeTag.id} style={styles.tag}>
@@ -353,7 +396,6 @@ export default function RecipeDetailScreen() {
             </View>
           </View>
         </ScrollView>
-      </View>
     </View>
   )
 }
@@ -419,58 +461,74 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  mainContent: {
+  scrollContent: {
     flex: 1,
-    flexDirection: 'row',
+    backgroundColor: 'white',
   },
-  leftSide: {
-    width: '40%',
-    backgroundColor: '#f5f5f5',
-  },
-  imagesColumn: {
-    padding: 16,
-    gap: 16,
-  },
-  imageWrapper: {
+  imageSection: {
+    width: '100%',
+    height: 400,
     position: 'relative',
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: '#f5f5f5',
   },
   image: {
     width: '100%',
-    height: 450,
+    height: '100%',
     backgroundColor: '#E0E0E0',
+  },
+  imageArrow: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  imageArrowLeft: {
+    left: 12,
+  },
+  imageArrowRight: {
+    right: 12,
+  },
+  imageArrowText: {
+    fontSize: 32,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+    marginTop: -4,
+  },
+  dotsContainer: {
+    position: 'absolute',
+    bottom: 12,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  dotActive: {
+    backgroundColor: 'white',
+    width: 24,
   },
   placeholderImage: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 12,
   },
   placeholderText: {
     fontSize: 80,
-  },
-  primaryBadge: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  primaryBadgeText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  rightSide: {
-    flex: 1,
-    backgroundColor: 'white',
   },
   content: {
     padding: 24,
@@ -635,17 +693,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: theme.colors.textDisabled,
     fontStyle: 'italic',
-  },
-  // Mobile styles - jednosĺpcové rozloženie
-  mainContentMobile: {
-    flexDirection: 'column',
-  },
-  leftSideMobile: {
-    width: '100%',
-    maxHeight: 400,
-  },
-  rightSideMobile: {
-    width: '100%',
   },
   reportSection: {
     marginTop: 32,
